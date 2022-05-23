@@ -1,5 +1,7 @@
 package br.com.antoniomonteiro.players.model
 
+import br.com.antoniomonteiro.routes.teams.model.TeamEntity
+import br.com.antoniomonteiro.routes.teams.model.toDomain
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -19,7 +21,8 @@ fun Application.playersRouting() {
                 PlayerEntity.all().map {
                     Player(
                         id = it.id.value,
-                        name = it.name
+                        name = it.name,
+                        team = it.team?.toDomain()
                     )
                 }
             }
@@ -42,8 +45,13 @@ fun Application.playersRouting() {
             val player = call.receive<Player>()
 
             val newPlayer = transaction {
+                val teamId = player.teamId
+                val playerTeam = if (teamId == null) null else {
+                    TeamEntity.findById(teamId)
+                }
                 PlayerEntity.new {
                     name = player.name
+                    team = playerTeam
                 }.toDomain()
             }
 
@@ -69,8 +77,13 @@ fun Application.playersRouting() {
                 val updatedPlayer = call.receive<Player>()
 
                 transaction {
+                    val teamId = updatedPlayer.teamId
+                    val playerTeam = if (teamId == null) null else {
+                        TeamEntity.findById(teamId)
+                    }
                     PlayerEntity.findById(id.toInt())?.run {
                         name = updatedPlayer.name
+                        team = playerTeam
                     }
                 }
 
@@ -85,7 +98,7 @@ fun Application.playersRouting() {
 
 fun configureTables() {
     transaction {
-        SchemaUtils.createMissingTablesAndColumns(
+        SchemaUtils.create(
             Players
         )
     }
