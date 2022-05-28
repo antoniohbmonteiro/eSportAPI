@@ -21,6 +21,7 @@ data class Amendoim(
 )
 
 fun Application.teamsRouting() {
+    val a = false
 
     configureTables()
 
@@ -28,17 +29,20 @@ fun Application.teamsRouting() {
         get("/teams") {
             val teamsWithPlayers = transaction {
                 val teams = TeamEntity.all()
-                teams.map {
-                    val players = it.players.map { player -> player.toDomain() }
 
-                    Amendoim(it.toDomain(), players)
+                teams.map {
+                    val players = it.players.map { player ->
+                        player.toDomain()
+                    }
+
+                    it.toDomain().also { it.players?.addAll(players) }
                 }
             }
 
             call.respond(teamsWithPlayers)
         }
         post("/teams") {
-            call.receive<Team>().let {  team->
+            call.receive<Team>().let { team ->
                 val newTeam = transaction {
                     TeamEntity.new {
                         name = team.name

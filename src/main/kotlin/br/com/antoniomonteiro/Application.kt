@@ -12,7 +12,7 @@ fun main() {
         configureRouting()
         configureSerialization()
         DbSettings.configureDatabase()
-
+        val a = false
         playersRouting()
         teamsRouting()
     }.start(wait = true)

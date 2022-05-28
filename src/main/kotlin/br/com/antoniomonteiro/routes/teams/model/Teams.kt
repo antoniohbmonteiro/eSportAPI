@@ -15,6 +15,7 @@ import org.jetbrains.exposed.sql.Column
 data class Team(
     val id: Int? = null,
     val name: String,
+    val players: MutableList<Player>? = mutableListOf()
 )
 
 object Teams : IntIdTable() {
